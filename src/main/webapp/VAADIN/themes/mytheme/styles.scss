@@ -1,0 +1,25 @@
+@import "mytheme.scss";
+@import "addons.scss";
+
+// This file prefixes all rules with the theme name to avoid causing conflicts with other themes.
+// The actual styles should be defined in mytheme.scss
+
+.mytheme {
+  @include addons;
+  @include mytheme;
+
+}
+
+.mytheme .v-margin-top {
+  padding-top: 15px;
+}
+
+.mytheme .v-margin-bottom {
+  padding-bottom: 10px;
+}
+
+.mytheme .v-grid-header th {
+  font-family: Calibri;
+  font-size: 18px;
+}
+
