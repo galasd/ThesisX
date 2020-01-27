@@ -76,7 +76,7 @@ public class ExcelExporter implements StreamResource.StreamSource {
                 jsonData = (JSONObject) queryResult.get(currentDataProvider);
                 // Create headers
                 createHeaderRow();
-                // In case of non empty API response
+                // In case of non-empty API response
                 // NASA API
                 if (Objects.equals(api, "Nasa")) {
                     jArray = jsonData.getJSONObject("near_earth_objects").getJSONArray(String.valueOf(beanData.nasaDateFrom));
