@@ -7,15 +7,15 @@ import com.vaadin.ui.MenuBar;
 import java.util.HashMap;
 
 /**
- * Menu bar pro navigator, ktery obsluhuje prepinani views
+ * Menu bar for navigator, which includes views selection
  */
 public class NavigableMenuBar extends MenuBar implements ViewChangeListener {
 
-    // Predchozi zvolena polozka menu
+    // Previous menu item
     private MenuBar.MenuItem previous = null;
-    // Soucasna polozka menu
+    // Current menu item
     private MenuBar.MenuItem current = null;
-    // Namapovat nazvy jednotlivych view k polozkam menu
+    // Map all views names to menu items
     private HashMap<String, MenuBar.MenuItem> menuItems = new HashMap<String, MenuBar.MenuItem>();
     private Navigator navigator = null;
 
@@ -23,7 +23,7 @@ public class NavigableMenuBar extends MenuBar implements ViewChangeListener {
         this.navigator = navigator;
     }
 
-    // Navigovat k prislusnemu view na zaklade vyberu polozky z menu
+    // Navigate to a given view
     private MenuBar.Command mycommand = new MenuBar.Command() {
         @Override
         public void menuSelected(MenuBar.MenuItem menuItem) {
@@ -32,17 +32,16 @@ public class NavigableMenuBar extends MenuBar implements ViewChangeListener {
         }
     };
 
-    // Pridat view do menu
+    // Add a view
     public void addView(String viewName, String caption) {
         menuItems.put(viewName, addItem(caption, mycommand));
     }
 
-    // Vybrat polozku menu na zaklade nazvu view
+    // Select a menu item mapped to a given view
     private boolean selectView(String viewName) {
-        // Overit, ze dana polozka menu skutecne existuje
         if (!menuItems.containsKey(viewName))
             return false;
-        // Vyber polozky menu
+        // Select a menu item
         if (previous != null)
             previous.setStyleName(null);
         if (current == null)
@@ -52,23 +51,22 @@ public class NavigableMenuBar extends MenuBar implements ViewChangeListener {
         return true;
     }
 
-    // Zvolit novou polozku menu
+    // Choose new menu item
     private String selectItem(MenuBar.MenuItem selectedItem) {
         current = selectedItem;
-        // Vyhledat nazev prislusne polozky menu
         for (String key : menuItems.keySet())
             if (menuItems.get(key) == selectedItem)
                 return key;
         return null;
     }
 
-    // Vybrat prislune view
+    // Select given view
     @Override
     public boolean beforeViewChange(ViewChangeListener.ViewChangeEvent event) {
         return selectView(event.getViewName());
     }
 
-    // Event po zmene view
+    // After viewChange event
     @Override
     public void afterViewChange(ViewChangeListener.ViewChangeEvent event) {
     }

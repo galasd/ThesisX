@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Rodicovsky bean pro Nasa a Mapbox data
+ * Parent bean for Nasa and Mapbox data
  */
 public class ApiData {
 

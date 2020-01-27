@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
- * JSON exporter pro grid
+ * JSON exporter for grid
  */
 public class JSONExporter implements StreamResource.StreamSource {
 
@@ -30,30 +30,29 @@ public class JSONExporter implements StreamResource.StreamSource {
     @Override
     public InputStream getStream() {
         try {
-            // Vytvoreni souboru pro zapis dat
+            // Create a file for json data
             File file = new File(File.createTempFile("ApiData", ".json").toURI());
-            // Ziskani pouziteho data provideru
+            // Get an appplied data provider
             DataProvider jsonDataProvider = grid.getDataProvider();
-            // Cesta k objektu obsahujicimu typ pouzivaneho API
+            // Get an object containing the API type
             Field apiType;
             apiType = jsonDataProvider.getClass().getDeclaredField("apiType");
-            // Cesta k objektu obsahujicimu json data
+            // Get an object containing the json data
             Field queryResult;
             queryResult = jsonDataProvider.getClass().getDeclaredField("requestResult");
-            // String obsahujici typ pouzivaneho API
             String api = (String) apiType.get(jsonDataProvider);
-            // Ziskani objektu obsahujiciho JSON data od pouziteho data provideru
+            // Get a JSON data object from a given data provider
             apiJSONData = (JSONObject) queryResult.get(jsonDataProvider);
-            // Pokud byl vracena prazdna odpoved, vytvorit prazdne mock pole
+            // In case of an empty API response, create an empty mock array
             if (apiJSONData == null) {
                 if (Objects.equals(api, "Nasa")) {
-                    apiJSONData = new JSONObject("{near_earth_objects:{Nebyl odeslan dotaz na API.}}");
+                    apiJSONData = new JSONObject("{near_earth_objects:{No API query was sent.}}");
                 }
                 if (Objects.equals(api, "Mapbox")) {
-                    apiJSONData = new JSONObject("{features:[Nebyl odeslan dotaz na API.]}");
+                    apiJSONData = new JSONObject("{features:[No API query was sent.]}");
                 }
             }
-            // Pokud byla vracena odpoved obsahujici data, ziskat z odpovedi potrebnou cast dat
+            // In case of non empty response, get the result data
             Object jObject = null;
             if (Objects.equals(api, "Nasa")) {
                 jObject = apiJSONData.getJSONObject("near_earth_objects");
@@ -61,14 +60,14 @@ public class JSONExporter implements StreamResource.StreamSource {
             if (Objects.equals(api, "Mapbox")) {
                 jObject = apiJSONData.getJSONArray("features");
             }
-            // Zapsat data do souboru
+            // Write data into file
             FileWriter fw = new FileWriter(file);
             fw.write(String.valueOf(jObject));
             fw.close();
-            // Ulozit obsah souboru do byteArray
+            // Save the file into byteArray
             byte[] bF = Files.readAllBytes(Paths.get(file.getPath()));
-            // Zapsat byteArray do baos
-            log.info("Stazeni kompletni odpovedi od " + apiType.get(jsonDataProvider) + " API ve formatu JSON.");
+            // Write the byteArray into baos
+            log.info("A response from " + apiType.get(jsonDataProvider) + " API in JSON format was downloaded.");
             return new ByteArrayInputStream(bF);
 
         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {

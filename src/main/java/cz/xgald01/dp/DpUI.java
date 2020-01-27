@@ -14,43 +14,42 @@ import cz.xgald01.dp.view.NasaView;
 import javax.servlet.annotation.WebServlet;
 
 /**
- * DpUI predstavuje zakladni vstupni bod cele aplikace. UI je reprezentovano bud oknem prohlizece
- * nebo casti HTML stranky obsazenou ve Vaadinovske aplikaci.
+ * DpUI is a main node of this app. UI is represented either by browser window
+ * or by part of HTML page included in a Vaadin application
  * <p>
- * UI je inicializovano prostrednictvim {@link #init(VaadinRequest)}. U teto metody se predpoklada,
- * jeji prekryti za ucelem pridani komponent do ui.
+ * UI is initiated via {@link #init(VaadinRequest)}. This method is supposed to be overrided
  */
 @Theme("mytheme")
 public class DpUI extends UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-        // Zakladni layout aplikace
+        // Root layout
         VerticalLayout rootLayout = new VerticalLayout();
         rootLayout.setSizeFull();
         setContent(rootLayout);
-        // View display ovladany navigatorem.
+        // View display controlled by navigator
         Panel viewDisplay = new Panel();
         viewDisplay.setSizeFull();
-        // Navigator pro ovladani jednotlivych view
+        // Navigator for views
         Navigator navigator = new Navigator(this, viewDisplay);
-        // Pridat jednotliva view
+        // Add views into navigator
         navigator.addView("BaseView", new BaseView());
-        navigator.addView("NASA_API", new NasaView("Nasa NEO - Zemi blízké asteroidy"));
-        navigator.addView("Mapbox_API", new MapboxView("Mapbox - Geokódování"));
+        navigator.addView("NASA_API", new NasaView("Nasa NEO - Near Earth Objects"));
+        navigator.addView("Mapbox_API", new MapboxView("Mapbox - Geocoding"));
         navigator.navigateTo("BaseView");
-        // Pridat navigator k hlavnimu menu
+        // Add navigator to main menu
         NavigableMenuBar menuBar = new NavigableMenuBar(navigator);
         rootLayout.addComponent(menuBar);
-        // Pridat view display pod hlavni menu
+        // Add a view display to main menu
         rootLayout.addComponent(viewDisplay);
         rootLayout.setExpandRatio(viewDisplay, 1.0f);
-        // Updatovat obrazovku po vyberu view
+        // Update screen after view selection
         navigator.addViewChangeListener(menuBar);
-        // Pridat polozky do menu a asociovat je s prislusnym view ID
+        // Add menu items
         menuBar.addView("NASA_API", "Nasa API");
         menuBar.addView("Mapbox_API", "Mapbox API");
-        // Pridat copyright line
+        // Add the copyright line
         HorizontalLayout footLine = new HorizontalLayout();
         footLine.setWidth("100%");
         Label author = new Label("© David Galaš 2019");

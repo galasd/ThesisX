@@ -6,30 +6,29 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * Zakladni korenove view
+ * Base root view
  */
 public class BaseView extends VerticalLayout implements View {
 
     private Label welcomeLabel;
 
     public BaseView() {
-        // Korenovy layout
+        // Root layout
         setSizeFull();
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
         welcomeUser();
-        // Pridani komponent
+        // Add components to root layout
         verticalLayout.addComponent(welcomeLabel);
         verticalLayout.setComponentAlignment(welcomeLabel, Alignment.MIDDLE_CENTER);
         welcomeLabel.addStyleName("welcome-style");
         addComponent(verticalLayout);
     }
 
-    // Vytvorit uvodni uvitaci napis
+    // Create a welcome label
     private void welcomeUser(){
-        // Uvitaci napis
         welcomeLabel = new Label();
-        welcomeLabel.setValue("Vítejte na hlavní stránce aplikace. Po práci s REST API pokračujte výběrem z menu.");
+        welcomeLabel.setValue("Select a REST API");
         welcomeLabel.setSizeUndefined();
     }
 }

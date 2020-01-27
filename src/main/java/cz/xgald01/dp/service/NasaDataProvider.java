@@ -21,7 +21,7 @@ import java.util.AbstractList;
 import java.util.stream.Stream;
 
 /**
- * Data provider pro NASA API
+ * Data provider for NASA API
  */
 public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject, T> implements ConfigurableFilterDataProvider<JSONObject, T, T> {
 
@@ -31,13 +31,14 @@ public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject,
     private HttpClient client = new HttpClient();
     public String apiType = "Nasa";
     public JSONObject requestResult = null;
+    public JSONArray requestData = null;
     NasaView.NasaData nasaData;
 
     /**
-     * Pozadavek na data od gridu
+     * Data query made by grid
      *
-     * @param query dotaz na API
-     * @return stream JSONObjectu odpovidajicich query
+     * @param query API query
+     * @return JSONObject stream according to given query
      */
     @Override
     protected Stream<JSONObject> fetchFromBackEnd(Query<JSONObject, T> query) {
@@ -46,10 +47,10 @@ public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject,
     }
 
     /**
-     * Vratit pocet zaznamu od API
+     * Returns a number of records
      *
-     * @param query dotaz na API
-     * @return pocet zaznamu v odpovedi
+     * @param query API query
+     * @return number of record in a response
      */
     @Override
     protected int sizeInBackEnd(Query<JSONObject, T> query) {
@@ -57,9 +58,9 @@ public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject,
             return 0;
         } else {
             try {
-                // V tomto pripade prijde prazdny query, jen pocet vysledku
+                // Empty query is send to get a number of records
                 sendQuery(query);
-                // Vratit pocet vysledku z query
+                // Return a number of record in a response
                 return requestResult.getInt("element_count");
             } catch (JSONException e) {
                 throw new RuntimeException(e);
@@ -68,40 +69,42 @@ public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject,
     }
 
     /**
-     * Odeslani dotazu na API
+     * Send and API query
      *
-     * @param query dotaz na API
-     * @return odpoved od API
+     * @param query API query
+     * @return API query response
      */
-    private synchronized Stream<JSONObject> sendQuery(Query<JSONObject, T> query) {
+    public synchronized Stream<JSONObject> sendQuery(Query<JSONObject, T> query) {
         try {
-            // Pokud nejsou vybrany parametry, vratit prazdny vysledek
+            // When no query parameters are selected, return empty data set
             if (nasaData == null) {
                 JSONObject jsonObject = new JSONObject("{ \"mockData\":[]}");
                 JSONArray mockArray = jsonObject.getJSONArray("mockData");
                 return jsonArrayStream(mockArray);
             } else {
-                // Definice povinnych parametru
+                // Mandatory parameters
                 getMethod.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                         new DefaultHttpMethodRetryHandler(3, false));
                 getMethod.getParams().setContentCharset(StandardCharsets.UTF_8.toString());
                 getMethod.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 getMethod.setRequestHeader("Accept", "application/json");
-                // Nastavit volitelne parametry dotazu
+                // Set optional parameters
                 getMethod.setQueryString(new NameValuePair[]{
                         new NameValuePair("api_key", "G5RtgrVQak8TBnysXstyRbd1MmJiOal23aUurQh9"),
                         new NameValuePair("start_date", String.valueOf(nasaData.getDateFrom())),
                         new NameValuePair("end_date", String.valueOf(nasaData.getDateTo()))
                 });
-                log.info("Odeslani dotazu na " + apiType + " API. Parametry dotazu: start_date: " +
+                log.info("Sending a query " + apiType + " to API. Query parameters: start_date: " +
                         String.valueOf(nasaData.getDateFrom()) + ", end_date: " + String.valueOf(nasaData.getDateTo()));
-                // Odeslat dotaz
+                // Send query
                 int apiResponse = client.executeMethod(getMethod);
                 byte[] primaryResponseBody = getMethod.getResponseBody();
                 requestResult = new JSONObject(new String(primaryResponseBody, "UTF-8"));
-                log.info("Ziskani odpovedi od API. Kod odpovedi: " + apiResponse);
+                log.info("Getting a response from API. Response code: " + apiResponse);
+                requestData = requestResult.getJSONObject("near_earth_objects").
+                        getJSONArray(String.valueOf(nasaData.getDateFrom()));
             }
-            return jsonArrayStream(requestResult.getJSONObject("near_earth_objects").getJSONArray(String.valueOf(nasaData.getDateFrom())));
+            return jsonArrayStream(requestData);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -109,12 +112,11 @@ public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject,
     }
 
     /**
-     * Vytvorit stream z JSON array
+     * Creates a JSONArray stream
      *
-     * @param array JSON array ze ktereho je vytvoren stream
-     * @return stream JSON values
+     * @param array JSON array to create a stream from
+     * @return stream of JSON values
      */
-
     private Stream<JSONObject> jsonArrayStream(JSONArray array) {
         assert array != null;
         return new AbstractList<JSONObject>() {
@@ -135,14 +137,18 @@ public class NasaDataProvider<T> extends AbstractBackEndDataProvider<JSONObject,
     }
 
     /**
-     * Nastavi filter pro data provider
+     * Sets a filter for data provider
      *
-     * @param filter NasaData
+     * @param filter MapboxData
      */
     @Override
     public void setFilter(T filter) {
 
         this.nasaData = (NasaView.NasaData) filter;
+    }
+
+    public JSONArray getResultData() {
+        return requestData;
     }
 }
 

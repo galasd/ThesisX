@@ -4,10 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cz.galasd.dp</groupId>
-    <artifactId>DiplomovaPrace</artifactId>
+    <artifactId>ThesisX</artifactId>
     <packaging>war</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <name>DiplomovaPrace</name>
+    <version>2.0</version>
+    <name>ThesisX</name>
 
     <prerequisites>
         <maven>3</maven>
@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.tomcat.path>/DiplomovaPrace##${project.version}</maven.tomcat.path>
+        <maven.tomcat.path>/ThesisX##${project.version}</maven.tomcat.path>
         <!-- If there are no local customizations, this can also be "fetch" or "cdn" -->
         <vaadin.widgetset.mode>local</vaadin.widgetset.mode>
     </properties>
@@ -110,6 +110,24 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.6.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>5.4.8.Final</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-annotations</artifactId>
+            <version>3.5.6-Final</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.18</version>
+        </dependency>
+
 
     </dependencies>
 

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Excel exporter pro grid a data bean
+ * Excel exporter for grid a data bean
  */
 public class ExcelExporter implements StreamResource.StreamSource {
 
@@ -55,44 +55,44 @@ public class ExcelExporter implements StreamResource.StreamSource {
     public InputStream getStream() {
         try {
             init();
-            // Ziskani pouziteho data provideru
+            // Get an applied  data provider
             DataProvider currentDataProvider = grid.getDataProvider();
             currentDataProvider.refreshAll();
-            // Cesta k objektu obsahujicimu json data
+            // Get an object containing the json data
             Field queryResult;
             queryResult = currentDataProvider.getClass().getDeclaredField("requestResult");
-            // Cesta k objektu obsahujicimu typ pouzivaneho API
+            // Get an object containing the API type
             Field apiType;
             apiType = currentDataProvider.getClass().getDeclaredField("apiType");
             String api = (String) apiType.get(currentDataProvider);
-            // Delka json array s daty k exportu
+            // JSON array data length
             int dataSize = 0;
-            // Pokud je vracen prazdny zaznam, vratit prazdny sobor s jednim sheetem a upozornenim
+            // In case of no data in a response, return an empty file with a warning
             if (queryResult.get(currentDataProvider) == null) {
                 Row row = exportSheet.createRow(0);
                 Cell cell = row.createCell(0);
-                cell.setCellValue("Nebyl odeslán dotaz na API.");
+                cell.setCellValue("No API query was sent.");
             } else {
                 jsonData = (JSONObject) queryResult.get(currentDataProvider);
-                // Vytvorit headery
+                // Create headers
                 createHeaderRow();
-                // Pokud je vracen neprazdny zaznam, zapsat data do sheetu
-                // Pokud se jedna o data od NASA API
+                // In case of non empty API response
+                // NASA API
                 if (Objects.equals(api, "Nasa")) {
                     jArray = jsonData.getJSONObject("near_earth_objects").getJSONArray(String.valueOf(beanData.nasaDateFrom));
                     viewKeys = beanData.jsonKeys;
                     dataSize = jArray.length();
                 }
-                // Pokud se jedna o data od Mapbox API
+                // Mapbox API
                 if (Objects.equals(api, "Mapbox")) {
                     jArray = jsonData.getJSONArray("features");
                     viewKeys = beanData.jsonKeys;
                     dataSize = 1;
                 }
-                // Ziskani a naplneni jednotlivych radku a bunek pod headerem
+                // Get and fill rows and cells under given header
                 int firstRowIndex = 2;
                 int normalColumnCount = 0;
-                // Ziskani klicu z jsonu
+                // Get json keys
                 List<String> keys = viewKeys;
                 for (int b = 0; b < dataSize; b++) {
                     Row row = exportSheet.createRow(firstRowIndex);
@@ -102,7 +102,7 @@ public class ExcelExporter implements StreamResource.StreamSource {
                         if (textField.length() > maxContentLength) {
                             textField.substring(0, 1500);
                         }
-                        // Naplneni bunek klici
+                        // Fill excel cells with keys
                         Cell cell = row.createCell(normalColumnCount);
                         cell.setCellValue(textField);
                         normalColumnCount++;
@@ -110,23 +110,23 @@ public class ExcelExporter implements StreamResource.StreamSource {
                     normalColumnCount = 0;
                     firstRowIndex++;
                 }
-                // Vytvorit titulni radku a zformatovat bunky
+                // Create title row and format cells
                 createTitleRow();
                 formatCells();
             }
-            // Zapsat vytvoreny workbook do baos
+            // Write the workbook into baos
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             workbook.write(baos);
             workbook.close();
             baos.close();
-            log.info("Export " + apiType.get(currentDataProvider) + " dat od formatu MS EXCEL.");
+            log.info("Export " + apiType.get(currentDataProvider) + " into MS EXCEL format.");
             return new ByteArrayInputStream(baos.toByteArray());
         } catch (IllegalAccessException | IOException | NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
     }
 
-    // Zalozit workbook a jednotlive styly, ktere se pouzivaji dale
+    // Creates a workbook and styles
     private void init() {
         workbook = new XSSFWorkbook();
         exportSheet = workbook.createSheet("Export");
@@ -135,7 +135,7 @@ public class ExcelExporter implements StreamResource.StreamSource {
         titleFont = workbook.createFont();
     }
 
-    // Zalozit titulni radku a vytvorit jednotlive styly
+    // Creates a title row
     private void createTitleRow() {
         XSSFRow titleRow = exportSheet.createRow(0);
         titleRow.createCell(0).setCellValue(title);
@@ -149,34 +149,32 @@ public class ExcelExporter implements StreamResource.StreamSource {
         exportSheet.validateMergedRegions();
     }
 
-    // Vytvorit radku s headery jendotlivych sloupcu
+    // Creates a header row
     private void createHeaderRow() {
         int headerCellNum = 0;
         int headerColumnNum = 0;
-        // Pokud jeste neni vytvoren list "Export", vytvorit
         if (workbook.getSheet("Export") == null) {
             exportSheet = workbook.createSheet("Export");
         }
         int screenWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
         XSSFFont headerFont = workbook.createFont();
-        // Naplneni header radku a jeho jednotlivych bunek
+        // Fill header row with data
         int rowNum = 1;
         Row exportHeaderRow = exportSheet.createRow(rowNum);
         String cellValue;
         for (int a = 0; a < grid.getColumns().size(); a++) {
             cellValue = ((Grid.Column) grid.getColumns().get(headerColumnNum)).getCaption();
-            // Bunky pro headery
+            // Cells for headers
             Cell headerCell = exportHeaderRow.createCell(headerCellNum);
             headerCell.setCellValue(cellValue);
-            // Nazvy tucne
             headerFont.setFontHeight(12);
             headerStyle.setFont(headerFont);
             headerStyle.setAlignment(HorizontalAlignment.CENTER);
             headerCell.setCellStyle(headerStyle);
-            // Nastaveni sirky sloupcu
+            // Set width for columns
             int cellValueLegth = cellValue.length();
             int screenWidthAdj = screenWidth / 3;
-            // Pokud je dana bunka sirsi nez tretina obrazovky, zuzit z estetickych duvodu
+            // If a given cell is wider than 1/3 of screen size, make it smaller
             if (cellValueLegth >= screenWidthAdj) {
                 exportSheet.setColumnWidth(headerColumnNum, screenWidthAdj * 256);
             } else {
@@ -191,7 +189,7 @@ public class ExcelExporter implements StreamResource.StreamSource {
         }
     }
 
-    // Vypocitat prumernou hodnotu delky hodnot, ulozenych v Listu
+    // Average length of legths in a list
     private double calculateAverage(List<Integer> lengths) {
         List<Integer> values = new ArrayList<>();
         Integer sum = 0;
@@ -207,63 +205,56 @@ public class ExcelExporter implements StreamResource.StreamSource {
         return sum;
     }
 
-    // Ziskat konkretni atribut z JSONObjectu
+    // Geta  given attribute from JSONObject
     private Object getJSONObjectAttribute(JSONObject jObject, String path) {
         return JsonPath.read(jObject.toString(), path);
     }
 
-    // Nastavit title pro export
+    // Sets a title for export
     public void setReportTitle(String reportTitle) {
         this.title = reportTitle;
     }
 
-    // Zformatovat bunky v sheetu
+    // Format cells in a sheet
     private void formatCells() {
-        // Ziskat pocet vyuzitych sloupcu
         int columnsUsed = exportSheet.getRow(1).getPhysicalNumberOfCells();
-        // Ziskat pocet vyuzitych radek
         int rowsUsed = exportSheet.getPhysicalNumberOfRows();
-        //Ziskat sirku kazde bunky z radku headeru
+        // Get a width of each cell in a sheet
         List<Integer> headerCellLengths = new ArrayList<>();
         for (int a = 0; a < exportSheet.getRow(1).getPhysicalNumberOfCells(); a++) {
             headerCellLengths.add(exportSheet.getRow(1).getCell(a).getStringCellValue().length());
         }
-        // Nastavit vysku header bunek
+        // Set cells height
         exportSheet.getRow(1).setHeight((short) 800);
-        // Nastavit sirku bunek
+        // Set cells width
         int customCellWidth = 0;
-        // Iterace pro kazdy vyuzity sloupec tabulky
         for (int b = 0; b < headerCellLengths.size(); b++) {
             int headerWidth = headerCellLengths.get(b);
             List<Integer> stringCellLengths = new ArrayList<>();
-            // Iterace pro kazdy vyuzity radek tabulky
             for (int c = 1; c < rowsUsed; c++) {
                 Cell selectedCell = exportSheet.getRow(c).getCell(b);
                 stringCellLengths.add(selectedCell.toString().length());
-                //Pokud je v bunce cislo, zarovnat doprava
                 if (NumberUtils.isNumber(selectedCell.toString())) {
                     CellStyle rightAligned = workbook.createCellStyle();
                     rightAligned.setAlignment(HorizontalAlignment.RIGHT);
                     selectedCell.setCellStyle(rightAligned);
                 }
             }
-            // Prumerna sirka bunky v danem sloupci
+            // Average cell width in given column
             int averageStringCellWidth = (int) calculateAverage(stringCellLengths);
-            // Porovnani prumerne sirky bunek ve sloupci a sirky nadpisu sloupce
             if (averageStringCellWidth > headerWidth) {
                 customCellWidth = averageStringCellWidth * 2;
             } else {
                 customCellWidth = headerWidth * 2;
             }
-            // Maximalni pocet znaku, ktery lze zapsat do bunky
+            // Max number of characters in an excel cell
             int MAX_COLUMN_WIDTH = 255;
             if (customCellWidth > MAX_COLUMN_WIDTH) {
                 customCellWidth = MAX_COLUMN_WIDTH;
             }
-            // Nastavit zvolenemu sloupci sirku
-            // Metoda setColumnWidth defaultne nastavuje width/256, proto je nutne parametr znasobit*256
+            //setColumnWidth sets width/256 by default, thus multiply by 256
             exportSheet.setColumnWidth(b, customCellWidth * 256);
-            // Vymazat pole kvuli pouziti pro dalsi sloupec
+            // Erase all data in an array to use it for another column
             stringCellLengths.clear();
         }
     }
