@@ -1,52 +1,37 @@
-ThesisX
-==============
+# Thesis
 
-Template for a simple Vaadin application that only requires a Servlet 3.0 container to run.
+Web Application for a thesis about the Vaadin framework version 8+.
+
+This application allows you to get and process data from NASA and MAPBOX restful API'S using the Vaadin framework version 8+.
+
+Instructions on how to set up a working environment for using the Thesis application follow below.
 
 
-Workflow
-========
+## Setting up IntelliJ IDEA to work with the application.
 
-To compile the entire project, run "mvn install".
+1. Install and run IDEA. Community Edition should work but having the Ultimate Edition is highly recommended.
+1. Make sure the Git and Maven plugins are installed and properly configured.
+1. Clone the repository using menu VCS -> Checkout from Version Control -> Git -> Git Repository URL -> https://github.com/galasd/Thesis.
+1. Open cloned repository as a maven object using the pom.xml file.
 
-To run the application, run "mvn jetty:run" and open http://localhost:8080/ .
 
-To produce a deployable production mode WAR:
-- change productionMode to true in the servlet class configuration (nested in the UI class)
-- run "mvn clean package"
-- test the war file with "mvn jetty:run-war"
+## Compilation
 
-Client-Side compilation
--------------------------
+The Thesis application is structured as a Maven project. The project can be compiled via Maven compiler plugin using the 'compiler:compile' command.
 
-The generated maven project is using an automatically generated widgetset by default. 
-When you add a dependency that needs client-side compilation, the maven plugin will 
-automatically generate it for you. Your own client-side customizations can be added into
-package "client".
 
-Debugging client side code
-  - run "mvn vaadin:run-codeserver" on a separate console while the application is running
-  - activate Super Dev Mode in the debug window of the application
+## Running an application server
 
-Developing a theme using the runtime compiler
--------------------------
+The application was developed using the Apache Tomcat server version 8. It is though recommended to use it to run the application.
 
-When developing the theme, Vaadin can be configured to compile the SASS based
-theme at runtime in the server. This way you can just modify the scss files in
-your IDE and reload the browser to see changes.
+Instructions on how to set up and run the application server can be found here: 
+https://tomcat.apache.org/tomcat-8.5-doc/index.html
 
-To use the runtime compilation, open pom.xml and comment out the compile-theme 
-goal from vaadin-maven-plugin configuration. To remove a possibly existing 
-pre-compiled theme, run "mvn clean package" once.
+## Add the current application server to IntelliJ IDEA
+1. Open 'Run' menu  and click 'Edit Configurations'.
+1. Click green + sign at top left corner and select 'Tomcat server'.
+1. Set up the configuration using the instructions from the link above.
+1. Run the configuration and open URL [http://localhost:8080/DiplomovaPrace]
 
-When using the runtime compiler, running the application in the "run" mode 
-(rather than in "debug" mode) can speed up consecutive theme compilations
-significantly.
 
-It is highly recommended to disable runtime compilation for production WAR files.
 
-Using Vaadin pre-releases
--------------------------
-
-If Vaadin pre-releases are not enabled by default, use the Maven parameter
-"-P vaadin-prerelease" or change the activation default value of the profile in pom.xml .
