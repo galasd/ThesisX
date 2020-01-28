@@ -1,8 +1,10 @@
-# Thesis
+# ThesisX
 
-Web Application for a thesis about the Vaadin framework version 8+.
+Web Application for extending my thesis about the Vaadin framework with basic database communication via Hibernate.
 
 This application allows you to get and process data from NASA and MAPBOX restful API'S using the Vaadin framework version 8+.
+
+The extension allows you to save downloaded data into database tables.
 
 Instructions on how to set up a working environment for using the Thesis application follow below.
 
@@ -26,6 +28,11 @@ The application was developed using the Apache Tomcat server version 8. It is th
 
 Instructions on how to set up and run the application server can be found here: 
 https://tomcat.apache.org/tomcat-8.5-doc/index.html
+
+## Database connection
+
+The application supports for local database connection via Wamp server MySQL database. In order to make it work, 
+corresponding database and tables need to be created on local dbs.
 
 ## Add the current application server to IntelliJ IDEA
 1. Open 'Run' menu  and click 'Edit Configurations'.
