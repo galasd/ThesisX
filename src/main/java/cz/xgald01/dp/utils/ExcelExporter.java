@@ -102,7 +102,7 @@ public class ExcelExporter implements StreamResource.StreamSource {
                         if (textField.length() > maxContentLength) {
                             textField.substring(0, 1500);
                         }
-                        // Fill excel cells with keys
+                        // Fill Excel cells with keys
                         Cell cell = row.createCell(normalColumnCount);
                         cell.setCellValue(textField);
                         normalColumnCount++;
